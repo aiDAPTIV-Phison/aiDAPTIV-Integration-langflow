@@ -5,13 +5,11 @@
 ## Setup
 1. Navigate into the installer directory
 2. Install the `aiDAPTIV_Langflow_Installer.exe`
-3. Double click on the `aiDAPTIV_launcher.exe` and the app will automatically open a terminal window and begin the start up process.
+3. Double click on the `aiDAPTIV Langflow.exe` and the app will automatically open a terminal window and begin the start up process.
 
 ## Application Setup and Access 
 1. **Embedding Process**: The application will take a few moments to convert the documents into embeddings for the Retrieval Augmented Generation (RAG) process.
- After the `Application start`, a link will apear in the terminal, `Ctrl+click` into it will bring you to the Langflow page.
-2. **Accessing Langflow:**: Once the terminal displays the message Application start (or similar confirmation), a local URL link will appear. 
-3. **Access the Web Interface:** Ctrl+click on this link to open the Langflow page in your web browser.
+2. **Accessing Langflow:**: Once the terminal displays the message `Auto-run of loaded flows completed`, the web interface open automatically.
 
 ## Using the Default Flow
 1. **Default Flow**: A pre-configured `Vector RAG` flow will be visible on the Langflow webpage.
