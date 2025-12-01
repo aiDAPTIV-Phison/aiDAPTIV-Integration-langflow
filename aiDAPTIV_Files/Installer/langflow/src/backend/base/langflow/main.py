@@ -269,7 +269,7 @@ def get_lifespan(*, fix_migration=False, version=None):
 
             # Start the delayed initialization as a background task
             # Allows the server to start first to avoid race conditions with MCP Server startup
-            mcp_init_task = asyncio.create_task(delayed_init_mcp_servers())
+            # mcp_init_task = asyncio.create_task(delayed_init_mcp_servers())
             async def delayed_auto_run_flows():
                 await asyncio.sleep(3.0)
                 await logger.ainfo("Starting auto-run of loaded flows after server startup")
@@ -279,6 +279,17 @@ def get_lifespan(*, fix_migration=False, version=None):
                     await logger.ainfo("Auto-run of loaded flows completed")
                 except Exception as e:
                     await logger.awarning(f"Auto-run of loaded flows failed: {e}")
+
+                # 3. Open the Browser
+                try:
+                    import webbrowser
+                    # You can fetch the port dynamically if you want, but 7860 is standard
+                    target_url = "http://localhost:7860"
+                    await logger.ainfo(f"🌐 Opening browser at {target_url}")
+                    webbrowser.open(target_url)
+                except Exception as e:
+                    await logger.awarning(f"Failed to open browser: {e}")
+                    
             auto_run_task = asyncio.create_task(delayed_auto_run_flows())
             _tasks.append(auto_run_task)
             yield 

@@ -859,7 +859,7 @@ async def _copy_required_flow_files(flow_data: dict, flows_path: str | Path, flo
     settings_service = get_settings_service()
     config_dir = Path(settings_service.settings.config_dir).resolve()
     flows_dir = Path(flows_path).resolve()
-    example_dir = flows_dir.parent / "Example" / "Files"
+    example_dir = flows_dir.parent / "docs"
 
     if not example_dir.exists():
         await logger.adebug(f"Example files directory not found at {example_dir}")
@@ -935,7 +935,7 @@ async def _run_flow_outputs(
         
         # Create empty background tasks (not needed for internal calls)
         background_tasks = BackgroundTasks()
-        
+        # print(f"[DEBUG] Starting build for flow {flow.name}, stop_component_id: {outputs[0]}")
         await logger.ainfo(f"[DEBUG] Starting build for flow {flow.name}, stop_component_id: {outputs[0]}")
         
         # Step 1: Start the flow build using internal API
@@ -952,7 +952,7 @@ async def _run_flow_outputs(
             queue_service=queue_service,
             flow_name=None,
         )
-        
+        # print(f"[DEBUG] Build job started: {job_id}")
         await logger.ainfo(f"[DEBUG] Build job started: {job_id}")
         
         # Step 2: Wait for events to complete
@@ -1020,6 +1020,7 @@ async def load_flows_from_directory() -> None:
     """
     settings_service = get_settings_service()
     flows_path = settings_service.settings.load_flows_path
+    print(f"flows path: {flows_path}")
     if not flows_path:
         print("Exit early from loading the flow")
         return
@@ -1074,6 +1075,7 @@ async def auto_run_loaded_flows() -> None:
     """
     settings_service = get_settings_service()
     flows_path = settings_service.settings.load_flows_path
+    print(f"flows path {flows_path}")
     if not flows_path:
         return
 
@@ -1087,7 +1089,7 @@ async def auto_run_loaded_flows() -> None:
         from langflow.schema.message import Message
         from sqlmodel import select
         from uuid import uuid4
-
+        
         GOLDEN_EXAMPLE_TITLE = "Example of Asking Question about the Documents"
         shared_session_id = GOLDEN_EXAMPLE_TITLE
         # Find superuser
@@ -1097,6 +1099,28 @@ async def auto_run_loaded_flows() -> None:
 
         if user is None:
             return
+        # --- FIX 1: RETRY LOGIC ---
+        # Wait for flows to be loaded into the DB by the backend lifespan
+        folder = await get_or_create_default_folder(session, user.id)
+        flows = []
+        retries = 0
+        max_retries = 5
+        
+        while not flows and retries < max_retries:
+            flow_stmt = select(Flow).where(Flow.folder_id == folder.id)
+            flow_result = await session.exec(flow_stmt)
+            flows = flow_result.all()
+            
+            if not flows:
+                print(f"[WAITING] No flows found in DB yet... (Attempt {retries+1}/{max_retries})")
+                await asyncio.sleep(2) # Wait 2 seconds before retrying
+                retries += 1
+        
+        if not flows:
+            print("[ERROR] Timed out waiting for flows to appear in the database.")
+            return
+
+        print(f"[INFO] Found {len(flows)} flows in the database.")
 
         # Get all flows in the default folder
         folder = await get_or_create_default_folder(session, user.id)
@@ -1106,6 +1130,7 @@ async def auto_run_loaded_flows() -> None:
 
         for flow in flows:
             try:
+                print(f"Auto-running flow: {flow.name} (ID: {flow.id})")
                 await logger.ainfo(f"Auto-running flow: {flow.name} (ID: {flow.id})")
                 # 1) Skip if the title message already exists for this flow
                 existing_stmt = select(MessageTable).where(
@@ -1114,9 +1139,11 @@ async def auto_run_loaded_flows() -> None:
                 )
                 existing_result = await session.exec(existing_stmt)
                 if existing_result.first() is not None:
+                    print(f"Skipping auto-run for flow {flow.name} – golden example chat already exists")
                     await logger.ainfo(
                         f"Skipping auto-run for flow {flow.name} – golden example chat already exists"
                     )
+                    
                     continue
 
                 shared_session_id = GOLDEN_EXAMPLE_TITLE
@@ -1138,11 +1165,13 @@ async def auto_run_loaded_flows() -> None:
                     if hasattr(vertex, 'params') and vertex.params and 'ingest_data' in vertex.params:
                         has_ingestion = True
                         ingestion_chroma_id = vertex.id
+                        print(f"Found ingestion Chroma component: {ingestion_chroma_id}")
                         await logger.ainfo(f"Found ingestion Chroma component: {ingestion_chroma_id}")
                         break
                
                 # Step 1: Run ingestion path first (if it exists)
                 if has_ingestion and ingestion_chroma_id:
+                    print(f"Running ingestion path for flow {flow.name}")
                     await logger.ainfo(f"Running ingestion path for flow {flow.name}")
                     try:
                         await _run_flow_outputs(
