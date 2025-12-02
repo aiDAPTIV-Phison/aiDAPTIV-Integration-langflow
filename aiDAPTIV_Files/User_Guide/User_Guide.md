@@ -2,8 +2,6 @@
 ## Overview 
 This guide explains how to install, configure, and use Langflow integrated with aiDAPTIV. It also covers how to run the default Vector RAG flow, test KV-cache-accelerated inference using golden examples, and understand the system’s startup behaviors.
 
-1. You should have the aiDAPTIV server up and hosted on `http://localhost:13141/v1`.
-
 ## Chapter 1: Installation and Setting
 ### Installation Steps
 #### Prerequisites
