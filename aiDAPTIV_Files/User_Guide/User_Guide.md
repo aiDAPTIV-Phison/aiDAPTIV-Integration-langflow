@@ -6,6 +6,7 @@ This guide explains how to install, configure, and use Langflow integrated with 
 ### Installation Steps
 #### Prerequisites
 1. Ensure the aiDAPTIV server is running and available at `http://localhost:13141/v1`
+2. Ensure that the embedding model is up and hosted on `http://localhost:8082/v1`. The recommended embedding model is `bge-m3-Q8_0`.
 #### Setup
 1. Navigate to the **installer** directory
 2. Install the `aiDAPTIV_Langflow_Installer.exe`
