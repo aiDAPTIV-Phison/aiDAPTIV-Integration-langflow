@@ -6,7 +6,7 @@ This guide explains how to install, configure, and use Langflow integrated with 
 ### Installation Steps
 #### Prerequisites
 1. Ensure the aiDAPTIV server is running and available at `http://localhost:13141/v1`
-2. Ensure that the embedding model is up and hosted on `http://localhost:8082/v1`. The recommended embedding model is `bge-m3-Q8_0`.
+
 #### Setup
 1. Navigate to the **installer** directory
 2. Install the `aiDAPTIV_Langflow_Installer.exe`
@@ -15,35 +15,33 @@ This guide explains how to install, configure, and use Langflow integrated with 
 ## Chapter 2: How to Use?
 ### Usage Workflow
 1. **Initial Setup**
-- When the application starts, it will automatically begin an embedding process, converting documents into vector embeddings for the Retrieval-Augmented Generation (RAG) pipeline.
 - Wait until the terminal shows the message:
-`Auto-run of loaded flows completed`.
+`Application started`.
 Once this appears, Langflow’s web interface will open automatically in your browser.
 2. **Basic Operation**
 - **Accessing the Default Flow**: 
-    - A preconfigured flow named `Vector Store RAG - KV cache Generation` will appear on the Langflow webpage.
-    - Click on `Vector Store RAG - KV cache Generation`.
-    - Then click the `Playground` icon (**top-right** corner) to enter the interactive chat interface.
+    - A preconfigured flow named `KV cache Generation` will appear on the Langflow webpage.
+    - Click on `KV cache Generation` to access the flow.
+
+- **Step-by-step instruction**:
+    - There are two flows in the `KV Cache Generation`.
+    - Run `Build KV Cache` flow to enhance the inference speed when conducting Q&A with your documents.
+    - Run `Q&A` flow when you're ready to chat with your assistant.
 
 - **Using Example Files (Golden Workflow for KV Cache)**
-    - Two golden example files have already been uploaded in the File node
-        - test_cytoplasm.txt
-        - test_thyroidgland_insulin.txt
-
-3. **Advanced Features**:
-- **Asking Questions (Testing)**
-    - You may now ask questions related to the uploaded documents.
-    - If KV cache has already been created for a document, inference will be significantly faster.
-    - When the terminal displays: `Golden Example exists`, it indicates that both example documents already have an initialized KV cache, enabling faster responses.
-- **Test with uploaded customized documents**
-    - You may test the system with your own uploaded documents. 
-    - First, run the `Load Data Flow` at the bottom of the page to embed your customzed documents
-    - After the embedding completes, proceed to run the `Retrieval Flow` to generate the KV cache for those documents.
+    - Start by building KV cache to enhance the inference speed. (This may take a few minutes to process large documents). This can be done in `Build KV Cache` flow.
+        - Two golden example files have already been uploaded in the File node
+            1. `test_cytoplasm.txt`
+            2. `test_thyroidgland_insulin.txt`
+        - To experience fast inference using KV cache reuse, first click the `select` icon in the `KV cache build` component to choose the files you want to process. By default, the two golden example files will appear in the UI when you click `select`. Tick to select them. ![KV Cache Select Files](images/Kvcache_select_files.png)
+        - Click the `Run` button of the component to build the KV cache. ![KV Cache Select Files Completed](images/Kvcache_select_files_completed.png)
+    - You may start chatting with your assistant at accelerated speed using the `Q&A` flow. 
+        - First, select the document you want to query by clicking the `Read File` component, then drag a connection from `Read File` component to the `context` field of the `Prompt` component. ![Q&A Select Files and Add Connection](images/QNA-select-files-add-connection.png)
+        - Then click the `Playground` icon (**top-right** corner) to enter the interactive chat interface. ![Enter Playground](images/QNA_playground.png)
 
 ## Chapter 3: Troubleshooting (Optional)
-### Issue 1: Slow Start-Up or Delayed Embedding Process
+### Issue 1: Slow Start-Up Process
 - **Symptoms**:
-    - Terminal appears stuck during `embedding documents`
     - Langflow webpage doesn't open automatically
 - **Solution**:
     - Wait at least `1-3 minutes`, depending on the number of documents being processed.
@@ -51,8 +49,7 @@ Once this appears, Langflow’s web interface will open automatically in your br
     - Open Langflow manually via `http://localhost:7860` and verify that all required fields are populated in every node:
         - `OPENAI_API_KEY`
         - `OPENAI_API_BASE`
-        - `OPENAI_API_BASE_EMBEDDING` 
         - (These are typically auto-filled when the application starts.)
+    - Restart the aiDAPTIV server, then relaunch the application
 - **Verification**:
-    - Check for the terminal message: `Auto-run of loaded flows completed`
-    - Confirm that the default Vector RAG flow appears in the UI.
+    - Confirm that all flows run successfully
