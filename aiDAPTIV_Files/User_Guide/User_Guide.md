@@ -29,6 +29,9 @@ Once this appears, Langflow’s web interface will open automatically in your br
     - Run `Q&A` flow when you're ready to chat with your assistant.
 
 - **Using Example Files (Golden Workflow for KV Cache)**
+    - Before running any components, please ensure that all required fields (e.g., `OpenAI API Key` and `OpenAI API Base`) are filled in correctly.
+      - The `OpenAI API Key` can be set to `EMPTY` (You can provide a valid API key from your cloud provider if there's any)
+      - The `OpenAI API Base` should be set to `http://localhost:13141/v1` (for aiDAPTIV).
     - Start by building KV cache to enhance the inference speed. (This may take a few minutes to process large documents). This can be done in `Build KV Cache` flow.
         - Two golden example files have already been uploaded in the File node
             1. `test_cytoplasm.txt`
@@ -38,18 +41,3 @@ Once this appears, Langflow’s web interface will open automatically in your br
     - You may start chatting with your assistant at accelerated speed using the `Q&A` flow. 
         - First, select the document you want to query by clicking the `Read File` component, then drag a connection from `Read File` component to the `context` field of the `Prompt` component. ![Q&A Select Files and Add Connection](images/QNA-select-files-add-connection.png)
         - Then click the `Playground` icon (**top-right** corner) to enter the interactive chat interface. ![Enter Playground](images/QNA_playground.png)
-
-## Chapter 3: Troubleshooting (Optional)
-### Issue 1: Slow Start-Up Process
-- **Symptoms**:
-    - Langflow webpage doesn't open automatically
-- **Solution**:
-    - Wait at least `1-3 minutes`, depending on the number of documents being processed.
-    - Ensure the aiDAPTIV server at `http://localhost:13141/v1` is running before launching Langflow.
-    - Open Langflow manually via `http://localhost:7860` and verify that all required fields are populated in every node:
-        - `OPENAI_API_KEY`
-        - `OPENAI_API_BASE`
-        - (These are typically auto-filled when the application starts.)
-    - Restart the aiDAPTIV server, then relaunch the application
-- **Verification**:
-    - Confirm that all flows run successfully
