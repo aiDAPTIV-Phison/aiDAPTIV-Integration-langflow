@@ -32,6 +32,7 @@ from langflow.initial_setup.setup import (
     load_bundles_from_urls,
     load_flows_from_directory,
     sync_flows_from_fs,
+    auto_run_loaded_flows
 )
 from langflow.middleware import ContentSizeLimitMiddleware
 from langflow.services.deps import get_queue_service, get_service, get_settings_service, get_telemetry_service
@@ -235,6 +236,8 @@ def get_lifespan(*, fix_migration=False, version=None):
             current_time = asyncio.get_event_loop().time()
             await logger.adebug("Loading flows")
             await load_flows_from_directory()
+            # from langflow.initial_setup.setup import auto_run_loaded_flows
+            # await auto_run_loaded_flows()
             sync_flows_from_fs_task = asyncio.create_task(sync_flows_from_fs())
             queue_service = get_queue_service()
             if not queue_service.is_started():  # Start if not already started
@@ -266,9 +269,30 @@ def get_lifespan(*, fix_migration=False, version=None):
 
             # Start the delayed initialization as a background task
             # Allows the server to start first to avoid race conditions with MCP Server startup
-            mcp_init_task = asyncio.create_task(delayed_init_mcp_servers())
+            # mcp_init_task = asyncio.create_task(delayed_init_mcp_servers())
+            async def delayed_auto_run_flows():
+                # await asyncio.sleep(3.0)
+                # await logger.ainfo("Starting auto-run of loaded flows after server startup")
+                # try:
+                #     from langflow.initial_setup.setup import auto_run_loaded_flows
+                #     await auto_run_loaded_flows()
+                #     await logger.ainfo("Auto-run of loaded flows completed")
+                # except Exception as e:
+                #     await logger.awarning(f"Auto-run of loaded flows failed: {e}")
 
-            yield
+                # 3. Open the Browser
+                try:
+                    import webbrowser
+                    # You can fetch the port dynamically if you want, but 7860 is standard
+                    target_url = "http://localhost:7860"
+                    await logger.ainfo(f"🌐 Opening browser at {target_url}")
+                    webbrowser.open(target_url)
+                except Exception as e:
+                    await logger.awarning(f"Failed to open browser: {e}")
+                    
+            auto_run_task = asyncio.create_task(delayed_auto_run_flows())
+            _tasks.append(auto_run_task)
+            yield 
 
         except asyncio.CancelledError:
             await logger.adebug("Lifespan received cancellation signal")
@@ -502,6 +526,7 @@ def setup_static_files(app: FastAPI, static_files_dir: Path) -> None:
         app (FastAPI): FastAPI app.
         static_files_dir (str): Path to the static files directory.
     """
+    print(f"static_files_dir: {static_files_dir}")
     app.mount(
         "/",
         StaticFiles(directory=static_files_dir, html=True),
