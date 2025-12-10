@@ -1073,9 +1073,21 @@ async def auto_run_loaded_flows() -> None:
     For RAG flows, runs the ingestion path first (to embed documents),
     then runs the retrieval path (to query the vector store).
     """
+    import os 
+
+    await logger.ainfo("Starting auto-run of loaded flows")
+    await logger.ainfo("The environment variables received:")
+
+    base_url = os.getenv("OPENAI_API_BASE")
+    api_key = os.getenv("OPENAI_API_KEY")
+    embedding_base_url = os.getenv("OPENAI_API_BASE_EMBEDDING")
+
+    await logger.ainfo(f"OpenAI Base URL: {base_url}")
+    await logger.ainfo(f"OpenAI API Key: {api_key}")
+    await logger.ainfo(f"Embedding Base URL: {embedding_base_url}")
+
     settings_service = get_settings_service()
     flows_path = settings_service.settings.load_flows_path
-    print(f"flows path {flows_path}")
     if not flows_path:
         return
 
